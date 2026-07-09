@@ -54,7 +54,7 @@ find . -name '*.rej' -delete 2>/dev/null || true
 if ! $is_ksu_next; then
   KSU_PATCH="$SUSFS_DIR/kernel_patches/KernelSU/10_enable_susfs_for_ksu.patch"
   if [ -f "$KSU_PATCH" ]; then
-    cd "$COMMON_DIR/KernelSU"
+    cd "$WORKSPACE_DIR/KernelSU"
     patch --fuzz=3 -p1 < "$KSU_PATCH"
     cd "$COMMON_DIR"
   fi

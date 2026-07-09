@@ -34,8 +34,7 @@ git -C "$COMMON_DIR" config user.email "builder@localhost"
 
 for metadata_path in \
   "$COMMON_DIR/Baseband-guard/.github" \
-  "$COMMON_DIR/KernelSU/.github" \
-  "$COMMON_DIR/SUSFS/.git"
+  "$COMMON_DIR/KernelSU/.github"
 do
   [ -e "$metadata_path" ] && rm -rf "$metadata_path"
 done
