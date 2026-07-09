@@ -31,8 +31,15 @@ git clone --depth=1 ${SUSFS_REF_RESOLVED:+--branch "$SUSFS_REF_RESOLVED"} "$SUSF
 
 cd "$COMMON_DIR"
 for p in "$SUSFS_DIR"/kernel_patches/50_add_susfs_in_*.patch; do
-  [ -f "$p" ] && patch --fuzz=3 -p1 < "$p"
+  [ -f "$p" ] && patch --fuzz=3 -p1 < "$p" || true
 done
+
+REJ_COUNT=$(find . -name '*.rej' 2>/dev/null | wc -l)
+if [ "$REJ_COUNT" -gt 0 ]; then
+  echo "⚠️ $REJ_COUNT .rej file(s) found — collecting for review:" >&2
+  find . -name '*.rej' -exec sh -c 'echo "=== {} ===" && cat "{}"' \; > "$COMMON_DIR/patch-rejects.log" 2>/dev/null
+  find . -name '*.rej' -delete 2>/dev/null || true
+fi
 
 if ! $is_ksu_next; then
   KSU_PATCH="$SUSFS_DIR/kernel_patches/KernelSU/10_enable_susfs_for_ksu.patch"
