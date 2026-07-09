@@ -80,7 +80,7 @@ jobs:
 
       - name: Add swap
         run: |
-          project/scripts/add-swap.sh 24 --aggressive
+          project/scripts/add-swap.sh 16
 
       - name: Install repo tool
         run: |

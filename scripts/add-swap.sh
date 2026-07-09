@@ -5,7 +5,7 @@
 
 set -euo pipefail
 
-SIZE_GB="${1:-24}"
+SIZE_GB="${1:-16}"
 AGGRESSIVE_MODE="${2:-}"
 SWAPFILE="/swapfile"
 
