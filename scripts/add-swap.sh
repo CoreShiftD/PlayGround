@@ -7,6 +7,7 @@ set -euo pipefail
 
 SIZE_GB="${1:-24}"
 AGGRESSIVE_MODE="${2:-}"
+declare -i ADDITIONAL_GB=0
 SWAPFILE="/swapfile"
 
 usage() {
