@@ -39,6 +39,8 @@ if [ "$REJ_COUNT" -gt 0 ]; then
   echo "⚠️ $REJ_COUNT .rej file(s) found — collecting for review:" >&2
   find . -name '*.rej' -exec sh -c 'echo "=== {} ===" && cat "{}"' \; > "$COMMON_DIR/patch-rejects.log" 2>/dev/null
   find . -name '*.rej' -delete 2>/dev/null || true
+  echo "❌ Aborting due to patch reject(s)" >&2
+  exit 1
 fi
 
 if ! $is_ksu_next; then
