@@ -55,8 +55,9 @@ if ! $is_ksu_next; then
   KSU_PATCH="$SUSFS_DIR/kernel_patches/KernelSU/10_enable_susfs_for_ksu.patch"
   [ -f "$KSU_PATCH" ] && patch --fuzz=3 -p1 < "$KSU_PATCH"
 else
-  if [ -d "kernel" ] && ! grep -q 'KSU_SUSFS' "kernel/Kconfig" 2>/dev/null; then
-    cat >> "kernel/Kconfig" << 'KCONFIG_EOF'
+  KSU_KCONFIG="KernelSU/kernel/Kconfig"
+  if [ -f "$KSU_KCONFIG" ] && ! grep -q 'KSU_SUSFS' "$KSU_KCONFIG" 2>/dev/null; then
+    cat >> "$KSU_KCONFIG" << 'KCONFIG_EOF'
 
 menu "KernelSU - SUSFS"
 config KSU_SUSFS
@@ -64,8 +65,6 @@ config KSU_SUSFS
 	depends on KSU
 	depends on THREAD_INFO_IN_TASK
 	default y
-	help
-	  Patch and Enable SUSFS to kernel with KernelSU.
 
 config KSU_SUSFS_SUS_PATH
 	bool "Enable to hide suspicious path"
