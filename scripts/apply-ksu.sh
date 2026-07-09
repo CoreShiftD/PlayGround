@@ -13,8 +13,7 @@ esac
 
 BRANCH="${KSU_CLONE_BRANCH:-${KSU_REF:-}}"
 
-git clone --depth=1 ${BRANCH:+--branch "$BRANCH"} "$REPO" "$KERNEL_DIR/KernelSU"
-git -C "$KERNEL_DIR/KernelSU" fetch --depth=1 origin --tags 2>/dev/null || true
+git clone ${BRANCH:+--branch "$BRANCH"} "$REPO" "$KERNEL_DIR/KernelSU"
 cd "$KERNEL_DIR"
 bash KernelSU/kernel/setup.sh ${KSU_CLONE_BRANCH:+$KSU_CLONE_BRANCH}
 echo "CONFIG_KSU=y" >> "$KERNEL_DIR/common/CoreShift.fragment"

@@ -23,8 +23,8 @@ resolve_ref() {
 }
 
 SUSFS_REF_RESOLVED="$(resolve_ref)"
-git clone --depth=1 ${SUSFS_REF_RESOLVED:+--branch "$SUSFS_REF_RESOLVED"} "$SUSFS_REPO" "$SUSFS_DIR"
-git -C "$SUSFS_DIR" fetch --depth=1 origin --tags 2>/dev/null || true
+git clone ${SUSFS_REF_RESOLVED:+--branch "$SUSFS_REF_RESOLVED"} "$SUSFS_REPO" "$SUSFS_DIR"
+git -C "$SUSFS_DIR" fetch origin --tags 2>/dev/null || true
 
 [ -f "$SUSFS_DIR/kernel_patches/fs/susfs.c" ] && cp "$SUSFS_DIR/kernel_patches/fs/susfs.c" "$COMMON_DIR/fs/"
 [ -f "$SUSFS_DIR/kernel_patches/include/linux/susfs.h" ] && cp "$SUSFS_DIR/kernel_patches/include/linux/susfs.h" "$COMMON_DIR/include/linux/"
