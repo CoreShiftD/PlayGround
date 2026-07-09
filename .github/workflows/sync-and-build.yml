@@ -158,14 +158,6 @@ jobs:
             project/scripts/package-ak3.sh \
             "${{ matrix.family }}" "$PWD" "out"
 
-      - name: Upload patch rejects (if any)
-        if: always()
-        uses: actions/upload-artifact@v6
-        with:
-          name: ${{ matrix.family }}-${{ inputs.variant || 'vanilla' }}-rejects
-          path: common/patch-rejects.log
-          if-no-files-found: ignore
-
       - name: Upload artifacts
         uses: actions/upload-artifact@v6
         with:
