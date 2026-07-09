@@ -73,7 +73,7 @@ jobs:
           testing: false
 
       - name: Free Disk Space (extra for android16+)
-        if: ${{ matrix.family == 'android16-6.12' || matrix.family == 'android17-6.18' }}
+        if: matrix.family == 'android16-6.12' || matrix.family == 'android17-6.18'
         uses: endersonmenezes/free-disk-space@v3
         with:
           remove_android: true
