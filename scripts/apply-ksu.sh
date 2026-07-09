@@ -7,7 +7,7 @@ VARIANT="${2:?ksu|kowsu|ksu-next}"
 case "$VARIANT" in
   ksu)      REPO="https://github.com/tiann/KernelSU.git" ;;
   kowsu)    REPO="https://github.com/KOWX712/KernelSU.git" ;;
-  ksu-next) REPO="https://github.com/pershoot/KernelSU-Next.git" ;;
+  ksu-next) REPO="${KSU_NEXT_REPO:-https://github.com/KernelSU-Next/KernelSU-Next.git}" ;;
   *) echo "Unknown KSU variant: $VARIANT"; exit 1 ;;
 esac
 

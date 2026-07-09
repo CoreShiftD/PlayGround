@@ -34,23 +34,15 @@ for feat in "${F[@]}"; do
       HAS_SUSFS=false
       for f2 in "${F[@]}"; do [ "$f2" = "susfs" ] && HAS_SUSFS=true; done
       if $HAS_SUSFS; then
-        KSU_CLONE_BRANCH=dev-susfs KSU_REF=dev-susfs \
+        KSU_NEXT_REPO=https://github.com/pershoot/KernelSU-Next.git \
+          KSU_CLONE_BRANCH=dev-susfs KSU_REF=dev-susfs \
           "$ROOT/scripts/apply-ksu.sh" "$WORKSPACE_DIR" "ksu-next"
       else
         "$ROOT/scripts/apply-ksu.sh" "$WORKSPACE_DIR" "ksu-next"
       fi
       ;;
     susfs)
-      KSU_VARIANT=""
-      KSU_NEXT_HAS_SUSFS=false
-      for f2 in "${F[@]}"; do
-        [ "$f2" = "ksu-next" ] && KSU_NEXT_HAS_SUSFS=true
-      done
-      if $KSU_NEXT_HAS_SUSFS; then
-        echo "SUSFS already integrated via KernelSU-Next dev-susfs branch, skipping apply-susfs.sh"
-        continue
-      fi
-      KSU_VARIANT="$KSU_VARIANT" "$ROOT/scripts/apply-susfs.sh" "$WORKSPACE_DIR" "$PROFILE"
+      "$ROOT/scripts/apply-susfs.sh" "$WORKSPACE_DIR" "$PROFILE"
       ;;
     droidspaces) "$ROOT/scripts/apply-droidspaces.sh" "$WORKSPACE_DIR" ;;
     *) echo "Unknown feature: $feat"; exit 1 ;;
