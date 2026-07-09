@@ -1,0 +1,142 @@
+name: Sync ACK LTS & Build
+
+on:
+  workflow_dispatch:
+    inputs:
+      build_env:
+        description: Comma-separated KEY=VALUE pairs (e.g. LTO=thin,KSU_REF=v1.0.5)
+        default: ''
+        type: string
+      variant:
+        description: Build variant
+        default: ksu-next-susfs-bbg-droidspaces
+        type: choice
+        options:
+          - vanilla
+          - ksu
+          - ksu-bbg
+          - ksu-susfs
+          - ksu-susfs-bbg
+          - kowsu
+          - kowsu-bbg
+          - ksu-next
+          - ksu-next-bbg
+          - ksu-next-susfs
+          - ksu-next-susfs-bbg
+          - droidspaces-bbg
+          - ksu-droidspaces
+          - ksu-bbg-droidspaces
+          - ksu-susfs-bbg-droidspaces
+          - ksu-next-susfs-bbg-droidspaces
+      family:
+        description: Kernel family
+        default: all
+        type: choice
+        options:
+          - all
+          - android12-5.10
+          - android13-5.10
+          - android13-5.15
+          - android14-5.15
+          - android14-6.1
+          - android15-6.6
+          - android16-6.12
+          - android17-6.18
+  schedule:
+    - cron: '0 6 * * 1,4'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        family: ${{ fromJSON(inputs.family == 'all' && '["android12-5.10","android13-5.10","android13-5.15","android14-5.15","android14-6.1","android15-6.6","android16-6.12","android17-6.18"]' || format('["{0}"]', inputs.family)) }}
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          path: project
+
+      - name: Install build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y bc bison ca-certificates curl flex gcc git \
+            libc6-dev libssl-dev openssl python3 python3-pip make ccache cpio zip clang \
+            binutils
+
+      - name: Free Disk Space
+        uses: endersonmenezes/free-disk-space@v3
+        with:
+          remove_android: true
+          remove_dotnet: true
+          remove_haskell: true
+          remove_tool_cache: true
+          remove_packages: "azure-cli google-cloud-cli microsoft-edge-stable google-chrome-stable firefox postgresql* temurin-* *llvm* mysql* dotnet-sdk-*"
+          remove_packages_one_command: true
+          remove_folders: "/usr/share/swift /usr/share/miniconda /usr/share/az* /usr/local/lib/node_modules /usr/local/share/chromium /usr/local/share/powershell /usr/local/julia /usr/local/aws-cli /usr/local/aws-sam-cli /usr/share/gradle"
+          rm_cmd: "rmz"
+          rmz_version: "3.1.1"
+          testing: false
+
+      - name: Add swap
+        run: |
+          project/scripts/add-swap.sh 24 --aggressive
+
+      - name: Install repo tool
+        run: |
+          curl -sS https://storage.googleapis.com/git-repo-downloads/repo > /usr/local/bin/repo
+          chmod 755 /usr/local/bin/repo
+
+      - name: Init and sync manifest workspace
+        run: |
+          MANIFEST_BRANCH=$(project/scripts/family-info.py "${{ matrix.family }}" manifest_branch)
+          git config --global user.name "builder"
+          git config --global user.email "builder@localhost"
+          repo init -u https://android.googlesource.com/kernel/manifest \
+            -b "$MANIFEST_BRANCH" --depth=1
+          repo sync --current-branch --no-tags -j$(nproc)
+
+      - name: Build
+        run: |
+          project/scripts/apply-variant.sh "$PWD" "${{ inputs.variant || 'vanilla' }}" "${{ matrix.family }}"
+
+          LTO="${LTO:-full}"
+
+          if [ "${{ inputs.variant }}" != "vanilla" ] && [ -n "${{ inputs.variant }}" ]; then
+            project/scripts/commit-workspace-changes.sh "$PWD"
+          fi
+
+          METHOD=$(project/scripts/family-info.py "${{ matrix.family }}" build_method)
+
+          case "$METHOD" in
+            google_build_sh)
+              BUILD_CONFIG=common/build.config.gki.aarch64 LTO="$LTO" \
+                POST_DEFCONFIG_CMDS='scripts/kconfig/merge_config.sh -m -r arch/arm64/configs/gki_defconfig CoreShift.fragment' \
+                ./build/build.sh
+              ;;
+            kleaf)
+              if [ ! -d prebuilts/rust ]; then
+                curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+                export PATH="$HOME/.cargo/bin:$PATH"
+                echo "$HOME/.cargo/bin" >> $GITHUB_PATH
+                RUST_VER=$(rustc --version | awk '{print $2}')
+                TOOLCHAIN_ROOT=$(dirname "$(dirname "$(command -v rustc)")")
+                mkdir -p prebuilts/rust/linux-x86
+                ln -sfn "$TOOLCHAIN_ROOT" "prebuilts/rust/linux-x86/$RUST_VER"
+              fi
+              touch common/BUILD.bazel
+              if ! grep -q 'CoreShift.fragment' common/BUILD.bazel; then
+                printf '\nexports_files(["CoreShift.fragment"])\n' >> common/BUILD.bazel
+              fi
+              tools/bazel run \
+                --lto="$LTO" \
+                --defconfig_fragment="//common:CoreShift.fragment" \
+                //common:kernel_aarch64_dist
+              ;;
+          esac
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v6
+        with:
+          name: ${{ matrix.family }}-${{ inputs.variant || 'vanilla' }}
+          path: out/*.zip
