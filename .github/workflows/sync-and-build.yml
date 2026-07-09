@@ -160,6 +160,18 @@ jobs:
               ;;
           esac
 
+      - name: Package AnyKernel3
+        run: |
+          AK3_SUFFIXES=$(python3 -c "
+import json
+with open('project/variants.json') as f:
+    v = json.load(f)['variants'].get('${{ inputs.variant || 'vanilla' }}', {})
+print(','.join(v.get('ak3_suffixes', [])), end='')
+")
+          CORESHIFT_AK3_SUFFIXES="$AK3_SUFFIXES" \
+            project/scripts/package-ak3.sh \
+            "${{ matrix.family }}" "$PWD" "out"
+
       - name: Upload artifacts
         uses: actions/upload-artifact@v6
         with:
