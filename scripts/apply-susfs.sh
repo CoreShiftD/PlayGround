@@ -32,6 +32,18 @@ git clone --depth=1 ${SUSFS_REF_RESOLVED:+--branch "$SUSFS_REF_RESOLVED"} "$SUSF
 [ -f "$SUSFS_DIR/kernel_patches/include/linux/susfs.h" ] && cp "$SUSFS_DIR/kernel_patches/include/linux/susfs.h" "$COMMON_DIR/include/linux/"
 [ -f "$SUSFS_DIR/kernel_patches/include/linux/susfs_def.h" ] && cp "$SUSFS_DIR/kernel_patches/include/linux/susfs_def.h" "$COMMON_DIR/include/linux/"
 
+# Add SUSFS Kconfig entry to fs/Kconfig so kleaf validation passes
+if ! grep -q "config KSU_SUSFS" "$COMMON_DIR/fs/Kconfig" 2>/dev/null; then
+  cat >> "$COMMON_DIR/fs/Kconfig" << 'KCONFIG_EOF'
+
+config KSU_SUSFS
+	bool "KernelSU SUSFS support"
+	default y
+	help
+	  Enable KernelSU SUSFS support - Advanced root hiding features.
+KCONFIG_EOF
+fi
+
 # Apply the per-branch patch (50_add_susfs_in_gki-*.patch)
 cd "$COMMON_DIR"
 for p in "$SUSFS_DIR"/kernel_patches/50_add_susfs_in_*.patch; do
@@ -44,11 +56,4 @@ if ! $is_ksu_next; then
   [ -f "$KSU_PATCH" ] && patch --fuzz=3 -p1 < "$KSU_PATCH"
 fi
 
-# Discover SUSFS Kconfig symbols
-SUSFS_SYMBOLS=""
-[ -f "$SUSFS_DIR/Kconfig" ] && SUSFS_SYMBOLS=$(grep -oP 'config\s+\K\w+' "$SUSFS_DIR/Kconfig" | grep SUSFS || true)
-[ -z "$SUSFS_SYMBOLS" ] && SUSFS_SYMBOLS="KSU_SUSFS"
-
-for sym in $SUSFS_SYMBOLS; do
-  grep -qxF "CONFIG_${sym}=y" "$FRAGMENT" 2>/dev/null || echo "CONFIG_${sym}=y" >> "$FRAGMENT"
-done
+grep -qxF "CONFIG_KSU_SUSFS=y" "$FRAGMENT" 2>/dev/null || echo "CONFIG_KSU_SUSFS=y" >> "$FRAGMENT"
