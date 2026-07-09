@@ -123,7 +123,7 @@ jobs:
           case "$METHOD" in
             google_build_sh)
               BUILD_CONFIG=common/build.config.gki.aarch64 LTO="$LTO" \
-                POST_DEFCONFIG_CMDS='scripts/kconfig/merge_config.sh -m -r arch/arm64/configs/gki_defconfig CoreShift.fragment' \
+                POST_DEFCONFIG_CMDS='scripts/kconfig/merge_config.sh -m -r arch/arm64/configs/gki_defconfig CoreShift.fragment && sed -i "s/^CONFIG_LSM=\"\\(.*\\)\"/CONFIG_LSM=\"\\1,baseband_guard\"/" .config' \
                 ./build/build.sh
               ;;
             kleaf)
