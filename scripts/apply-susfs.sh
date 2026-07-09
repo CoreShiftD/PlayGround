@@ -54,65 +54,6 @@ find . -name '*.rej' -delete 2>/dev/null || true
 if ! $is_ksu_next; then
   KSU_PATCH="$SUSFS_DIR/kernel_patches/KernelSU/10_enable_susfs_for_ksu.patch"
   [ -f "$KSU_PATCH" ] && patch --fuzz=3 -p1 < "$KSU_PATCH"
-else
-  KSU_KCONFIG="KernelSU/kernel/Kconfig"
-  if [ -f "$KSU_KCONFIG" ] && ! grep -q 'KSU_SUSFS' "$KSU_KCONFIG" 2>/dev/null; then
-    cat >> "$KSU_KCONFIG" << 'KCONFIG_EOF'
-
-menu "KernelSU - SUSFS"
-config KSU_SUSFS
-	bool "KernelSU addon - SUSFS"
-	depends on KSU
-	depends on THREAD_INFO_IN_TASK
-	default y
-
-config KSU_SUSFS_SUS_PATH
-	bool "Enable to hide suspicious path"
-	depends on KSU_SUSFS
-	default y
-
-config KSU_SUSFS_SUS_MOUNT
-	bool "Enable to hide suspicious mounts"
-	depends on KSU_SUSFS
-	default y
-
-config KSU_SUSFS_SUS_KSTAT
-	bool "Enable to spoof suspicious kstat"
-	depends on KSU_SUSFS
-	default y
-
-config KSU_SUSFS_SPOOF_UNAME
-	bool "Enable to spoof uname"
-	depends on KSU_SUSFS
-	default y
-
-config KSU_SUSFS_ENABLE_LOG
-	bool "Enable logging susfs log to kernel"
-	depends on KSU_SUSFS
-	default y
-
-config KSU_SUSFS_HIDE_KSU_SUSFS_SYMBOLS
-	bool "Enable to automatically hide ksu and susfs symbols from /proc/kallsyms"
-	depends on KSU_SUSFS
-	default y
-
-config KSU_SUSFS_SPOOF_CMDLINE_OR_BOOTCONFIG
-	bool "Enable to spoof /proc/bootconfig (gki) or /proc/cmdline (non-gki)"
-	depends on KSU_SUSFS
-	default y
-
-config KSU_SUSFS_OPEN_REDIRECT
-	bool "Enable open_redirect hook"
-	depends on KSU_SUSFS
-	default y
-
-config KSU_SUSFS_SUS_MAP
-	bool "Enable to spoof suspicious soft links"
-	depends on KSU_SUSFS
-	default y
-endmenu
-KCONFIG_EOF
-  fi
 fi
 
 # Scan kernel tree for KSU_SUSFS Kconfig symbols declared by the applied patches

@@ -15,5 +15,5 @@ BRANCH="${KSU_CLONE_BRANCH:-${KSU_REF:-}}"
 
 git clone --depth=1 ${BRANCH:+--branch "$BRANCH"} "$REPO" "$KERNEL_DIR/KernelSU"
 cd "$KERNEL_DIR"
-sh KernelSU/kernel/setup.sh
+bash KernelSU/kernel/setup.sh ${KSU_CLONE_BRANCH:+$KSU_CLONE_BRANCH}
 echo "CONFIG_KSU=y" >> "$KERNEL_DIR/common/CoreShift.fragment"
