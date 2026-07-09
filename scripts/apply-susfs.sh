@@ -34,6 +34,9 @@ for p in "$SUSFS_DIR"/kernel_patches/50_add_susfs_in_*.patch; do
   [ -f "$p" ] && patch --fuzz=3 -p1 < "$p"
 done
 
+find . -name '*.rej' -exec sh -c 'echo "=== {} ===" && cat "{}"' \; > "$COMMON_DIR/patch-rejects.log" 2>/dev/null || true
+find . -name '*.rej' -delete 2>/dev/null || true
+
 if ! $is_ksu_next; then
   KSU_PATCH="$SUSFS_DIR/kernel_patches/KernelSU/10_enable_susfs_for_ksu.patch"
   [ -f "$KSU_PATCH" ] && patch --fuzz=3 -p1 < "$KSU_PATCH"
