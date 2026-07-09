@@ -31,23 +31,27 @@ git clone --depth=1 ${SUSFS_REF_RESOLVED:+--branch "$SUSFS_REF_RESOLVED"} "$SUSF
 
 cd "$COMMON_DIR"
 for p in "$SUSFS_DIR"/kernel_patches/50_add_susfs_in_*.patch; do
-  [ -f "$p" ] && patch --fuzz=3 -p1 < "$p" || {
-    echo "❌ Patch failed: $p — trying sed fallback for namespace.c" >&2
-    if [ -f "fs/namespace.c.rej" ]; then
-      anchor='#include <linux/mnt_idmapping.h>'
-      if grep -qF "$anchor" "fs/namespace.c" && ! grep -q 'susfs_def.h' "fs/namespace.c"; then
-        sed -i "/$anchor/a\
+  [ -f "$p" ] || continue
+  # Strip fs/namespace.c hunk — it fails on GKI common kernels due to context mismatch
+  sed '/^diff --git a\/fs\/namespace.c/,/^diff --git /{/^diff --git a\/fs\/namespace.c/d;/^diff --git /!d}' "$p" > "${p}.stripped"
+  patch --fuzz=3 -p1 < "${p}.stripped"
+  rm -f "${p}.stripped"
+done
+
+# Apply namespace.c changes via sed (stable anchor: #include <linux/mnt_idmapping.h>)
+if ! grep -q 'susfs_def.h' "fs/namespace.c"; then
+  anchor='#include <linux/mnt_idmapping.h>'
+  if grep -qF "$anchor" "fs/namespace.c"; then
+    sed -i "/$anchor/a\
 #ifdef CONFIG_KSU_SUSFS_SUS_MOUNT\n#include <linux/susfs_def.h>\n#endif\n\
 #ifdef CONFIG_KSU_SUSFS_SUS_MOUNT\nextern bool susfs_is_current_ksu_domain(void);\nextern struct static_key_true susfs_is_sdcard_android_data_not_decrypted;\n#define CL_COPY_MNT_NS BIT(25)\n#endif" "fs/namespace.c"
-        echo "  ✅ namespace.c patched via sed" >&2
-      else
-        echo "  ❌ Cannot apply namespace.c via sed (anchor missing or already patched)" >&2
-      fi
-      find . -name '*.rej' -exec sh -c 'echo "=== {} ===" >&2 && cat "{}" >&2' \;
-      find . -name '*.rej' -delete
-    fi
-  }
-done
+  else
+    echo "❌ Cannot apply namespace.c changes — anchor not found" >&2
+    exit 1
+  fi
+fi
+
+find . -name '*.rej' -delete 2>/dev/null || true
 
 if ! $is_ksu_next; then
   KSU_PATCH="$SUSFS_DIR/kernel_patches/KernelSU/10_enable_susfs_for_ksu.patch"
