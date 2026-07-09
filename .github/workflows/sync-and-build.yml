@@ -82,7 +82,7 @@ jobs:
       - name: Add swap
         run: |
           if [ "${{ matrix.family }}" = "android16-6.12" ] || [ "${{ matrix.family }}" = "android17-6.18" ]; then
-            project/scripts/add-swap.sh 48
+            project/scripts/add-swap.sh 32
           else
             project/scripts/add-swap.sh 16
           fi
