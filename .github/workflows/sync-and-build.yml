@@ -162,12 +162,7 @@ jobs:
 
       - name: Package AnyKernel3
         run: |
-          AK3_SUFFIXES=$(python3 -c "
-import json
-with open('project/variants.json') as f:
-    v = json.load(f)['variants'].get('${{ inputs.variant || 'vanilla' }}', {})
-print(','.join(v.get('ak3_suffixes', [])), end='')
-")
+          AK3_SUFFIXES=$(python3 -c "import json,sys; v=json.load(open('project/variants.json'))['variants'].get('${{ inputs.variant || 'vanilla' }}', {}); print(','.join(v.get('ak3_suffixes', [])))")
           CORESHIFT_AK3_SUFFIXES="$AK3_SUFFIXES" \
             project/scripts/package-ak3.sh \
             "${{ matrix.family }}" "$PWD" "out"
