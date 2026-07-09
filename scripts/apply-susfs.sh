@@ -32,10 +32,20 @@ git clone --depth=1 ${SUSFS_REF_RESOLVED:+--branch "$SUSFS_REF_RESOLVED"} "$SUSF
 cd "$COMMON_DIR"
 for p in "$SUSFS_DIR"/kernel_patches/50_add_susfs_in_*.patch; do
   [ -f "$p" ] && patch --fuzz=3 -p1 < "$p" || {
-    echo "❌ Patch failed: $p" >&2
-    find . -name '*.rej' -exec sh -c 'echo "=== {} ===" >&2 && cat "{}" >&2' \;
-    find . -name '*.rej' -delete
-    exit 1
+    echo "❌ Patch failed: $p — trying sed fallback for namespace.c" >&2
+    if [ -f "fs/namespace.c.rej" ]; then
+      anchor='#include <linux/mnt_idmapping.h>'
+      if grep -qF "$anchor" "fs/namespace.c" && ! grep -q 'susfs_def.h' "fs/namespace.c"; then
+        sed -i "/$anchor/a\
+#ifdef CONFIG_KSU_SUSFS_SUS_MOUNT\n#include <linux/susfs_def.h>\n#endif\n\
+#ifdef CONFIG_KSU_SUSFS_SUS_MOUNT\nextern bool susfs_is_current_ksu_domain(void);\nextern struct static_key_true susfs_is_sdcard_android_data_not_decrypted;\n#define CL_COPY_MNT_NS BIT(25)\n#endif" "fs/namespace.c"
+        echo "  ✅ namespace.c patched via sed" >&2
+      else
+        echo "  ❌ Cannot apply namespace.c via sed (anchor missing or already patched)" >&2
+      fi
+      find . -name '*.rej' -exec sh -c 'echo "=== {} ===" >&2 && cat "{}" >&2' \;
+      find . -name '*.rej' -delete
+    fi
   }
 done
 
