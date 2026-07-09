@@ -98,6 +98,17 @@ jobs:
 
       - name: Build
         run: |
+          # Export build_env KEY=VALUE pairs
+          IFS=',' read -ra PAIRS <<< "${{ inputs.build_env }}"
+          for pair in "${PAIRS[@]}"; do
+            pair="${pair#"${pair%%[![:space:]]*}"}"
+            pair="${pair%"${pair##*[![:space:]]}"}"
+            if [[ "$pair" == *"="* ]]; then
+              echo "export $pair"
+              export "$pair"
+            fi
+          done
+
           project/scripts/apply-variant.sh "$PWD" "${{ inputs.variant || 'vanilla' }}" "${{ matrix.family }}"
 
           LTO="${LTO:-full}"
