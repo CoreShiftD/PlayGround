@@ -52,7 +52,6 @@ for feat in "${F[@]}"; do
       fi
       KSU_VARIANT="$KSU_VARIANT" "$ROOT/scripts/apply-susfs.sh" "$WORKSPACE_DIR" "$PROFILE"
       ;;
-    bbg)      "$ROOT/scripts/apply-bbg.sh" "$WORKSPACE_DIR" ;;
     droidspaces) "$ROOT/scripts/apply-droidspaces.sh" "$WORKSPACE_DIR" ;;
     *) echo "Unknown feature: $feat"; exit 1 ;;
   esac

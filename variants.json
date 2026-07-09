@@ -78,25 +78,14 @@
   "variants": {
     "vanilla": { "description": "Baseline GKI build", "features": [], "ak3_suffixes": [] },
     "ksu": { "description": "KernelSU", "features": ["ksu"], "ak3_suffixes": ["KSU"] },
-    "ksu-bbg": { "description": "KernelSU + BBG", "features": ["ksu", "bbg"], "ak3_suffixes": ["KSU", "BBG"] },
     "ksu-susfs": { "description": "KernelSU + SUSFS", "features": ["ksu", "susfs"], "ak3_suffixes": ["KSU", "SUSFS"] },
-    "ksu-susfs-bbg": { "description": "KernelSU + SUSFS + BBG", "features": ["ksu", "susfs", "bbg"], "ak3_suffixes": ["KSU", "SUSFS", "BBG"] },
     "kowsu": { "description": "KOWX712 KernelSU fork", "features": ["kowsu"], "ak3_suffixes": ["KOWSU"] },
-    "kowsu-bbg": { "description": "KOWX712 KernelSU fork + BBG", "features": ["kowsu", "bbg"], "ak3_suffixes": ["KOWSU", "BBG"] },
     "ksu-next": { "description": "KernelSU-Next", "features": ["ksu-next"], "ak3_suffixes": ["KSUNEXT"] },
-    "ksu-next-bbg": { "description": "KernelSU-Next + BBG", "features": ["ksu-next", "bbg"], "ak3_suffixes": ["KSUNEXT", "BBG"] },
     "ksu-next-susfs": { "description": "KernelSU-Next + SUSFS", "features": ["ksu-next", "susfs"], "ak3_suffixes": ["KSUNEXT", "SUSFS"] },
-    "ksu-next-susfs-bbg": { "description": "KernelSU-Next + SUSFS + BBG", "features": ["ksu-next", "susfs", "bbg"], "ak3_suffixes": ["KSUNEXT", "SUSFS", "BBG"] },
-    "droidspaces-bbg": { "description": "DroidSpaces GKI + BBG", "features": ["bbg", "droidspaces"], "ak3_suffixes": ["BBG", "DROIDSPACES"] },
     "ksu-droidspaces": { "description": "KernelSU + DroidSpaces", "features": ["ksu", "droidspaces"], "ak3_suffixes": ["KSU", "DROIDSPACES"] },
-    "ksu-bbg-droidspaces": { "description": "KernelSU + BBG + DroidSpaces", "features": ["ksu", "bbg", "droidspaces"], "ak3_suffixes": ["KSU", "BBG", "DROIDSPACES"] },
     "ksu-susfs-droidspaces": { "description": "KernelSU + SUSFS + DroidSpaces", "features": ["ksu", "susfs", "droidspaces"], "ak3_suffixes": ["KSU", "SUSFS", "DROIDSPACES"] },
-    "ksu-susfs-bbg-droidspaces": { "description": "KernelSU + SUSFS + BBG + DroidSpaces", "features": ["ksu", "susfs", "bbg", "droidspaces"], "ak3_suffixes": ["KSU", "SUSFS", "BBG", "DROIDSPACES"] },
     "kowsu-droidspaces": { "description": "KOWX712 + DroidSpaces", "features": ["kowsu", "droidspaces"], "ak3_suffixes": ["KOWSU", "DROIDSPACES"] },
-    "kowsu-bbg-droidspaces": { "description": "KOWX712 + BBG + DroidSpaces", "features": ["kowsu", "bbg", "droidspaces"], "ak3_suffixes": ["KOWSU", "BBG", "DROIDSPACES"] },
     "ksu-next-droidspaces": { "description": "KernelSU-Next + DroidSpaces", "features": ["ksu-next", "droidspaces"], "ak3_suffixes": ["KSUNEXT", "DROIDSPACES"] },
-    "ksu-next-bbg-droidspaces": { "description": "KernelSU-Next + BBG + DroidSpaces", "features": ["ksu-next", "bbg", "droidspaces"], "ak3_suffixes": ["KSUNEXT", "BBG", "DROIDSPACES"] },
-    "ksu-next-susfs-droidspaces": { "description": "KernelSU-Next + SUSFS + DroidSpaces", "features": ["ksu-next", "susfs", "droidspaces"], "ak3_suffixes": ["KSUNEXT", "SUSFS", "DROIDSPACES"] },
-    "ksu-next-susfs-bbg-droidspaces": { "description": "KernelSU-Next + SUSFS + BBG + DroidSpaces", "features": ["ksu-next", "susfs", "bbg", "droidspaces"], "ak3_suffixes": ["KSUNEXT", "SUSFS", "BBG", "DROIDSPACES"] }
+    "ksu-next-susfs-droidspaces": { "description": "KernelSU-Next + SUSFS + DroidSpaces", "features": ["ksu-next", "susfs", "droidspaces"], "ak3_suffixes": ["KSUNEXT", "SUSFS", "DROIDSPACES"] }
   }
 }
