@@ -17,3 +17,8 @@ git clone ${BRANCH:+--branch "$BRANCH"} "$REPO" "$KERNEL_DIR/KernelSU"
 cd "$KERNEL_DIR"
 bash KernelSU/kernel/setup.sh ${KSU_CLONE_BRANCH:+$KSU_CLONE_BRANCH}
 echo "CONFIG_KSU=y" >> "$KERNEL_DIR/common/CoreShift.fragment"
+
+# Suppress -Wpointer-bool-conversion false positives in selinux_hide.c
+# triggered by clang 18+ on function-pointer existence checks.
+KSU_KBUILD="$KERNEL_DIR/KernelSU/kernel/Kbuild"
+[ -f "$KSU_KBUILD" ] && echo "ccflags-y += -Wno-pointer-bool-conversion" >> "$KSU_KBUILD"

@@ -30,25 +30,40 @@ git -C "$SUSFS_DIR" fetch origin --tags 2>/dev/null || true
 [ -f "$SUSFS_DIR/kernel_patches/include/linux/susfs.h" ] && cp "$SUSFS_DIR/kernel_patches/include/linux/susfs.h" "$COMMON_DIR/include/linux/"
 [ -f "$SUSFS_DIR/kernel_patches/include/linux/susfs_def.h" ] && cp "$SUSFS_DIR/kernel_patches/include/linux/susfs_def.h" "$COMMON_DIR/include/linux/"
 
+ROOT="$(dirname "$(readlink -f "$0")")/.."
+LOCAL_OVERRIDE_DIR="$ROOT/patches/susfs/$PROFILE"
+
 cd "$COMMON_DIR"
 for p in "$SUSFS_DIR"/kernel_patches/50_add_susfs_in_*.patch; do
   [ -f "$p" ] || continue
-  if grep -q '^diff --git a/fs/namespace.c' "$p"; then
-    sed '/^diff --git a\/fs\/namespace.c/,/^diff --git /{/^diff --git a\/fs\/namespace.c/d;/^diff --git /!d}' "$p" > "${p}.stripped"
-    patch --fuzz=3 -p1 < "${p}.stripped"
+
+  # Fix context line: kernel renamed vma_pages -> vma_data_pages
+  # on android16-6.12+ but SUSFS patches still reference vma_pages.
+  case "$PROFILE" in *6.12*) sed -i 's/\bvma_pages\b/vma_data_pages/g' "$p" ;; esac
+
+  # Check for local override patches (per-version file-specific .patch files
+  # that replace sections of the SUSFS patch where context has drifted).
+  declare -a overrides=()
+  while IFS= read -r -d '' f; do overrides+=("$f"); done < \
+    <(find "$LOCAL_OVERRIDE_DIR" -name '*.patch' -type f -print0 2>/dev/null || true)
+
+  if [ "${#overrides[@]}" -gt 0 ]; then
+    # Strip overridden file sections from the SUSFS patch
+    cp "$p" "${p}.stripped"
+    for override in "${overrides[@]}"; do
+      target_file=$(head -1 "$override" | sed -n 's/^--- a\/\(.*\)/\1/p')
+      [ -n "$target_file" ] || continue
+      sed -i "\|^diff --git a/$target_file|,\|^diff --git |{\|^diff --git a/$target_file|d;\|^diff --git |!d}" "${p}.stripped"
+    done
+    patch --fuzz=3 -p1 < "${p}.stripped" || true
     rm -f "${p}.stripped"
+    for override in "${overrides[@]}"; do
+      patch --fuzz=3 -p1 < "$override" || true
+    done
   else
-    patch --fuzz=3 -p1 < "$p"
+    patch --fuzz=3 -p1 < "$p" || true
   fi
 done
-
-if ! grep -q 'susfs_def.h' "fs/namespace.c" 2>/dev/null; then
-  if grep -qF '#include <linux/mnt_idmapping.h>' "fs/namespace.c" 2>/dev/null; then
-    sed -i '\|#include <linux/mnt_idmapping.h>|a\
-#ifdef CONFIG_KSU_SUSFS_SUS_MOUNT\n#include <linux/susfs_def.h>\n#endif\n\
-#ifdef CONFIG_KSU_SUSFS_SUS_MOUNT\nextern bool susfs_is_current_ksu_domain(void);\nextern struct static_key_true susfs_is_sdcard_android_data_not_decrypted;\n#define CL_COPY_MNT_NS BIT(25)\n#endif' "fs/namespace.c"
-  fi
-fi
 
 find . -name '*.rej' -delete 2>/dev/null || true
 
