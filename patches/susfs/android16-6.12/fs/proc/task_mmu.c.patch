@@ -1,6 +1,7 @@
---- a/fs/proc/task_mmu.c
-+++ b/fs/proc/task_mmu.c
-@@ -27,6 +27,9 @@
+diff --git a/fs/proc/task_mmu.c b/fs/proc/task_mmu.c
+--- a/fs/proc/task_mmu.c	2026-07-10 15:42:30.028994591 +0000
++++ b/fs/proc/task_mmu.c	2026-07-10 15:45:32.112994602 +0000
+@@ -26,6 +26,9 @@
  #include <linux/overflow.h>
  #include <linux/buildid.h>
  #include <trace/hooks/mm.h>
@@ -10,7 +11,7 @@
  
  #include <asm/elf.h>
  #include <asm/tlb.h>
-@@ -455,6 +458,13 @@
+@@ -452,6 +455,13 @@
  	seq_putc(m, ' ');
  }
  
@@ -24,7 +25,7 @@
  static void
  show_map_vma(struct seq_file *m, struct vm_area_struct *vma)
  {
-@@ -465,15 +475,37 @@
+@@ -462,15 +472,37 @@
  	unsigned long long pgoff = 0;
  	unsigned long start, end;
  	dev_t dev = 0;
@@ -62,7 +63,7 @@
  	start = vma->vm_start;
  	end = VMA_PAD_START(vma);
  
-@@ -500,6 +532,16 @@
+@@ -478,6 +510,16 @@
  
  	show_vma_header_prefix(m, start, end, flags, pgoff, dev, ino);
  
@@ -79,21 +80,28 @@
  	get_vma_name(vma, &path, &name, &name_fmt);
  	if (path) {
  		seq_pad(m, ' ');
-@@ -1330,6 +1372,13 @@
+@@ -1295,6 +1337,7 @@
  				  mss->private_hugetlb >> 10, 7);
  	SEQ_PUT_DEC(" kB\nSwap:           ", mss->swap);
  	SEQ_PUT_DEC(" kB\nSwapPss:        ",
++
+ 					mss->swap_pss >> PSS_SHIFT);
+ 	SEQ_PUT_DEC(" kB\nLocked:         ",
+ 					mss->pss_locked >> PSS_SHIFT);
+@@ -1307,6 +1350,12 @@
+ {
+ 	struct vm_area_struct *vma = v;
+ 	struct mem_size_stats mss = {};
 +#ifdef CONFIG_KSU_SUSFS_SUS_MAP
 +	if (vma->vm_file) {
 +		if (SUSFS_IS_INODE_SUS_MAP(file_inode(vma->vm_file)))
 +			return 0;
 +	}
 +#endif // #ifdef CONFIG_KSU_SUSFS_SUS_MAP
-+
- 					mss->swap_pss >> PSS_SHIFT);
- 	SEQ_PUT_DEC(" kB\nLocked:         ",
- 					mss->pss_locked >> PSS_SHIFT);
-@@ -1403,7 +1452,14 @@
+ 
+ 	if (!vma_pages(vma))
+ 		goto show_pad;
+@@ -1367,7 +1416,14 @@
  
  	vma_start = vma->vm_start;
  	do {
@@ -108,7 +116,7 @@
  		last_vma_end = vma->vm_end;
  
  		/*
-@@ -1476,8 +1532,15 @@
+@@ -1433,8 +1489,15 @@
  
  			/* Case 4 above */
  			if (vma->vm_end > last_vma_end) {
@@ -124,7 +132,7 @@
  			}
  		}
  	} for_each_vma(vmi, vma);
-@@ -2268,6 +2331,9 @@
+@@ -2225,6 +2288,9 @@
  	while (count && (start_vaddr < end_vaddr)) {
  		int len;
  		unsigned long end;
@@ -134,7 +142,7 @@
  
  		pm.pos = 0;
  		end = (start_vaddr + PAGEMAP_WALK_SIZE) & PAGEMAP_WALK_MASK;
-@@ -2277,7 +2343,15 @@
+@@ -2234,7 +2300,15 @@
  		ret = mmap_read_lock_killable(mm);
  		if (ret)
  			goto out_free;
@@ -149,3 +157,4 @@
 +#endif // #ifdef CONFIG_KSU_SUSFS_SUS_MAP
  		mmap_read_unlock(mm);
  		start_vaddr = end;
+ 

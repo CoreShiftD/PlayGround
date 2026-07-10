@@ -63,6 +63,9 @@ if [ ! -f "$AK3_DIR/anykernel.sh" ] || [ ! -d "$AK3_DIR/tools" ]; then
   echo "AnyKernel3 clone broken" >&2; exit 1
 fi
 
+chmod +x "$AK3_DIR/anykernel.sh"
+chmod +x "$AK3_DIR/tools/"* 2>/dev/null || true
+
 cp -f "$RAW_IMAGE_PATH" "$AK3_DIR/Image"
 cp -f "$FINAL_CONFIG_PATH" "$AK3_DIR/ikconfig.txt"
 cp -f "$FINAL_CONFIG_PATH" "$ARTIFACT_DIR/ikconfig.txt"

@@ -52,6 +52,9 @@ for p in "$SUSFS_DIR"/kernel_patches/50_add_susfs_in_*.patch; do
     cp "$p" "${p}.stripped"
     for override in "${overrides[@]}"; do
       target_file=$(head -1 "$override" | sed -n 's/^--- a\/\(.*\)/\1/p')
+      if [ -z "$target_file" ]; then
+        target_file=$(head -1 "$override" | sed -n 's/^diff --git a\/\(.*\) b\/.*/\1/p')
+      fi
       [ -n "$target_file" ] || continue
       sed -i "\|^diff --git a/$target_file|,\|^diff --git |{\|^diff --git a/$target_file|d;\|^diff --git |!d}" "${p}.stripped"
     done

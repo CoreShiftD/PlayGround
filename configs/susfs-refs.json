@@ -1,0 +1,12 @@
+{
+  "profiles": {
+    "android12-5.10": "gki-android12-5.10",
+    "android13-5.10": "gki-android13-5.10",
+    "android13-5.15": "gki-android13-5.15",
+    "android14-5.15": "gki-android14-5.15",
+    "android14-6.1": "gki-android14-6.1",
+    "android15-6.6": "gki-android15-6.6"
+  },
+  "android_kernels": {},
+  "kernels": {}
+}
