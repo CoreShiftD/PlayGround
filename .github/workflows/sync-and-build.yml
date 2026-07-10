@@ -70,6 +70,7 @@ jobs:
             firefox postgresql* temurin-* *llvm* mysql* dotnet-sdk-*
             php* ruby* ghc* cabal* texlive* imagemagick*
             snapd man-db manpages
+            ${{ (matrix.family == 'android16-6.12' || matrix.family == 'android17-6.18') && 'cpp-* gcc-* g++-* containerd* docker* build-essential libicu* libssl* nodejs npm yarnpkg python3*' || '' }}
           remove_packages_one_command: true
           remove_folders: >-
             /usr/share/swift /usr/share/miniconda /usr/share/az* /usr/local/lib/node_modules
@@ -78,6 +79,7 @@ jobs:
             /opt/hostedtoolcache /usr/local/.ghcup /usr/share/doc /usr/share/man
             /usr/share/info /var/cache /var/lib/gems /usr/local/share/boost
             /usr/share/java /usr/share/R
+            ${{ (matrix.family == 'android16-6.12' || matrix.family == 'android17-6.18') && '/usr/lib/llvm-* /usr/lib/clang /usr/lib/python3* /usr/lib/jvm /usr/lib/R /usr/lib/ruby /usr/lib/nodejs /usr/local/include /usr/local/share/man /usr/src /var/lib/apt /var/log /var/tmp /tmp/*' || '' }}
           rm_cmd: "rmz"
           rmz_version: "3.1.1"
           testing: false
