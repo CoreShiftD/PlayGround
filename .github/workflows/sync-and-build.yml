@@ -64,17 +64,20 @@ jobs:
           remove_dotnet: true
           remove_haskell: true
           remove_tool_cache: true
-          remove_codecov: true
+          remove_swap: true
           remove_packages: >-
             azure-cli google-cloud-cli microsoft-edge-stable google-chrome-stable
             firefox postgresql* temurin-* *llvm* mysql* dotnet-sdk-*
-            ${{ (matrix.family == 'android16-6.12' || matrix.family == 'android17-6.18') && 'php* ruby* ghc* cabal* texlive* imagemagick*' || '' }}
+            php* ruby* ghc* cabal* texlive* imagemagick*
+            snapd man-db manpages
           remove_packages_one_command: true
           remove_folders: >-
             /usr/share/swift /usr/share/miniconda /usr/share/az* /usr/local/lib/node_modules
             /usr/local/share/chromium /usr/local/share/powershell /usr/local/julia
             /usr/local/aws-cli /usr/local/aws-sam-cli /usr/share/gradle
-            ${{ (matrix.family == 'android16-6.12' || matrix.family == 'android17-6.18') && '/opt/hostedtoolcache /usr/local/.ghcup /usr/share/doc /usr/share/man /usr/share/info /var/cache' || '' }}
+            /opt/hostedtoolcache /usr/local/.ghcup /usr/share/doc /usr/share/man
+            /usr/share/info /var/cache /var/lib/gems /usr/local/share/boost
+            /usr/share/java /usr/share/R
           rm_cmd: "rmz"
           rmz_version: "3.1.1"
           testing: false
